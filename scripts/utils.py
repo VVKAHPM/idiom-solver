@@ -5,6 +5,7 @@ def extract_pinyin(word):
     finals = pinyin(word, style=Style.FINALS, strict=False)
     tones = pinyin(word, style=Style.TONE3)
 
+    word_list = list(word)
     initial_list = []
     final_list = []
     tones_number = []
@@ -19,4 +20,4 @@ def extract_pinyin(word):
         else:
             tones_number.append(0)
     
-    return initial_list, final_list, tones_number
+    return word_list, initial_list, final_list, tones_number

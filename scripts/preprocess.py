@@ -9,7 +9,7 @@ with open("data/idioms.txt", "r", encoding="utf-8") as f:
 processed = []
 
 for idiom in idioms:
-    initials, finals, tones = extract_pinyin(idiom)
+    words, initials, finals, tones = extract_pinyin(idiom)
     processed.append({"word": idiom, "initials": initials, "finals": finals, "tones": tones})
 
 with open("data/processed_idioms.json", "w", encoding="utf-8") as f:
