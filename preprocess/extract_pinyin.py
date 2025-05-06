@@ -24,15 +24,14 @@ def extract_pinyin(word):
     
 
 
-with open("data/idiom.json", "r", encoding="utf-8") as f:
-    idioms = json.load(f)
+with open("data/idioms.txt", "r", encoding="utf-8") as f:
+    idioms = [line.strip() for line in f if line.strip()]
 
 processed = []
 
 for idiom in idioms:
-    word = idiom["word"]
-    initials, finals, tones = extract_pinyin(word)
-    processed.append({"word": word, "initials": initials, "finals": finals, "tones": tones})
+    initials, finals, tones = extract_pinyin(idiom)
+    processed.append({"word": idiom, "initials": initials, "finals": finals, "tones": tones})
 
 with open("data/processed_idioms.json", "w", encoding="utf-8") as f:
     json.dump(processed, f, ensure_ascii=False, indent=2)
