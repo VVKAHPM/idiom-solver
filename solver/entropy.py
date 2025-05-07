@@ -1,20 +1,16 @@
 import math
 from functools import lru_cache
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 from solver.feedback_parser import get_feedback
-from scripts.utils import extract_pinyin  # 假设你有一个提取拼音的函数
+from scripts.utils import extract_pinyin 
 
-# 缓存反馈结果
 @lru_cache(maxsize=None)
 def cached_feedback(answer, guess):
     return get_feedback(answer, guess)
 
-# 将反馈转换为 key
 def feedback_to_key(feedback):
     return tuple(tuple(x) for x in feedback)
 
-# 计算信息熵
 def calculate_entropy(guess, candidates):
     distribution = {}
     for candidate in candidates:
