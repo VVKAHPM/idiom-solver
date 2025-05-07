@@ -80,6 +80,23 @@ class IdiomCell(tk.Frame):
             self.initial_box.config(font=("黑体", 16))
             self.final_box.config(font=("黑体", 16))
             self.tone_box.config(font=("黑体", 16))
+    def reset(self):
+        self.entry.delete(0, tk.END)
+        self.char_box.config(text="字", font=("黑体", 16))
+        self.char_box.state = 2
+        self.char_box.update_color()
+
+        self.initial_box.config(text="声", font=("黑体", 16))
+        self.initial_box.state = 2
+        self.initial_box.update_color()
+
+        self.final_box.config(text="韵", font=("黑体", 16))
+        self.final_box.state = 2
+        self.final_box.update_color()
+
+        self.tone_box.config(text="调", font=("黑体", 16))
+        self.tone_box.state = 2
+        self.tone_box.update_color()
 
 class IdiomSolverApp:
     def __init__(self, master):
@@ -127,6 +144,8 @@ class IdiomSolverApp:
             self.update_candidate_list()
         else:
             tk.messagebox.showerror("输入错误", "请输入四个汉字！")
+        for cell in self.cells:
+            cell.reset()
 
 
     def get_user_feedback(self):
@@ -143,11 +162,3 @@ class IdiomSolverApp:
         self.candidate_listbox.delete(0, tk.END)
         for cand in self.candidates[:10]:
             self.candidate_listbox.insert(tk.END, cand)
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    root.title("Idiom-solver")
-    root.iconbitmap("images/favicon_k3k_icon.ico")
-
-    app = IdiomSolverApp(root)
-    root.mainloop()
