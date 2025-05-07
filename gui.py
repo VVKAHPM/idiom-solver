@@ -1,0 +1,153 @@
+import json
+import tkinter as tk
+import tkinter.messagebox as messagebox
+import tkinter.font as tkFont
+from pypinyin import pinyin, Style
+from solver.filter import prune
+
+
+class ColorBox(tk.Label):
+
+    def __init__(self, master, text, **kwargs):
+        super().__init__(master, text=text, width=6, height=3, font=("黑体", 16), relief="raised", **kwargs)
+        self.state = 2
+        self.text = text
+        self.bind("<Button-1>", self.toggle_color)
+        self.update_color()
+
+    def toggle_color(self, event=None):
+        self.state = (self.state + 1) % 3
+        self.update_color()
+
+    def update_color(self):
+        colors = {0: "#1D9C9C", 1: "#DE7525", 2: "#9CA3AF"}
+        self.config(bg=colors[self.state])
+    
+    def get_state(self):
+        if self.text == '-': 
+            return -1
+        return self.state
+
+    def set_text(self, new_text):
+        self.config(text=new_text)
+        self.text = new_text
+
+
+class IdiomCell(tk.Frame):
+
+    def __init__(self, master):
+        super().__init__(master, bd=1, relief="solid", padx=5, pady=5)
+        
+        self.entry = tk.Entry(self, width=3, font=("'黑体'", 36), justify="center")
+        self.entry.grid(row=0, column=0, columnspan=4, padx=8, pady=8, ipadx=8, ipady=15)
+        self.entry.bind("<KeyRelease>", self.update_pinyin)
+
+        self.char_box = ColorBox(self, "字")
+        self.initial_box = ColorBox(self, "声")
+        self.final_box = ColorBox(self, "韵")
+        self.tone_box = ColorBox(self, "调")
+
+        self.char_box.grid(row=1, column=0)
+        self.initial_box.grid(row=1, column=1)
+        self.final_box.grid(row=1, column=2)
+        self.tone_box.grid(row=1, column=3)
+
+    def update_pinyin(self, event=None):
+        word = self.entry.get().strip()
+        if len(word) == 1:
+            try:
+                initial = pinyin(word, style=Style.INITIALS, strict=False)[0][0]
+                final = pinyin(word, style=Style.FINALS, strict=False)[0][0]
+                tone = pinyin(word, style=Style.TONE3, strict=False)[0][0]
+                tone_number = ''.join(filter(str.isdigit, tone)) or '0'
+
+                self.char_box.set_text(word)
+                self.initial_box.set_text(initial or "-")
+                self.initial_box.config(font=("'Times New Roman'", 16))
+                self.final_box.set_text(final or "-")
+                self.final_box.config(font=("'Times New Roman'", 16))
+                self.tone_box.set_text(tone_number)
+                self.tone_box.config(font=("'Times New Roman'", 16))
+
+            except Exception as e:
+                print("拼音解析出错:", e)
+        else:
+            self.char_box.set_text("字")
+            self.initial_box.set_text("声")
+            self.final_box.set_text("韵")
+            self.tone_box.set_text("调")
+            self.char_box.config(font=("黑体", 16))
+            self.initial_box.config(font=("黑体", 16))
+            self.final_box.config(font=("黑体", 16))
+            self.tone_box.config(font=("黑体", 16))
+
+class IdiomSolverApp:
+    def __init__(self, master):
+        self.master = master
+        
+        self.guess_input = [] 
+        self.candidates = []  
+        self.load_candidates()  
+        
+        self.create_widgets()
+        self.update_candidate_list()
+
+    def load_candidates(self):
+        with open("data/processed_idioms.json", "r", encoding="utf-8") as f:
+            idioms = json.load(f)
+        self.candidates = [item["word"] for item in idioms]
+
+    def create_widgets(self):
+
+        self.entry_frame = tk.Frame(self.master)
+        self.entry_frame.pack(pady=20)
+        self.cells = []
+        for i in range(4):
+            cell = IdiomCell(self.entry_frame)
+            cell.grid(row=0, column=i, padx=5)
+            self.cells.append(cell)
+        
+        self.submit_button = tk.Button(self.master, text="提交", command=self.on_submit, font=("黑体", 14))
+        self.submit_button.pack(pady=10)
+
+        self.candidate_frame = tk.Frame(self.master)
+        self.candidate_frame.pack(side="left", padx=20, pady=10)
+        self.candidate_label = tk.Label(self.candidate_frame, text="候选词列表", font=("黑体", 14))
+        self.candidate_label.pack()
+        self.candidate_listbox = tk.Listbox(self.candidate_frame, width=30, height=10, font=("黑体", 12))
+        self.candidate_listbox.pack()
+        
+    def on_submit(self):
+        # 获取用户输入并更新候选词
+        guess = "".join([cell.entry.get().strip() for cell in self.cells])
+        if len(guess) == 4:
+            feedback = self.get_user_feedback()  # 获取用户反馈
+            self.candidates = prune(guess, feedback, self.candidates)  
+
+            self.update_candidate_list()
+        else:
+            tk.messagebox.showerror("输入错误", "请输入四个汉字！")
+
+
+    def get_user_feedback(self):
+        feedback = []
+
+        feedback.append([cell.char_box.get_state() for cell in self.cells])
+        feedback.append([cell.initial_box.get_state() for cell in self.cells])
+        feedback.append([cell.final_box.get_state() for cell in self.cells])
+        feedback.append([cell.tone_box.get_state() for cell in self.cells])
+        print(feedback)
+        return feedback
+
+    def update_candidate_list(self):
+        self.candidate_listbox.delete(0, tk.END)
+        for cand in self.candidates[:10]:
+            self.candidate_listbox.insert(tk.END, cand)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("Idiom-solver")
+    root.iconbitmap("images/favicon_k3k_icon.ico")
+
+    app = IdiomSolverApp(root)
+    root.mainloop()

@@ -1,5 +1,4 @@
 import json
-from solver.entropy import rank_by_entropy
 from solver.filter import prune
 
 def get_user_feedback():
