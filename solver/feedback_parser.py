@@ -5,23 +5,25 @@ def compare(list1, list2):
     :param list1: The answer
     :param list2: The guess
     """
-    result = [2] * 4
-    l1_used = [False] * 4  
-    l2_used = [False] * 4  
+    result = [-1] * 4
+    l1_used = [False] * 4
 
     for i in range(4):
+        if list2[i] == "":
+            continue
         if list1[i] == list2[i]:
             result[i] = 0
             l1_used[i] = True
-            l2_used[i] = True
 
     for i in range(4):
-        if not l2_used[i]:
+        if result[i] == -1 and list2[i] != "":
             for j in range(4):
                 if not l1_used[j] and list2[i] == list1[j]:
                     result[i] = 1
                     l1_used[j] = True
                     break
+            if result[i] == -1:
+                result[i] = 2
 
     return result
 
