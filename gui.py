@@ -38,12 +38,14 @@ class ColorBox(tk.Label):
 
 class IdiomCell(tk.Frame):
 
-    def __init__(self, master):
+    def __init__(self, master, parent):
         super().__init__(master, bd=1, relief="solid", padx=5, pady=5)
         
+        self.master = master
+        self.parent = parent
         self.entry = tk.Entry(self, width=3, font=(ChineseFont, 36), justify="center")
         self.entry.grid(row=0, column=0, columnspan=4, padx=8, pady=8, ipadx=8, ipady=15)
-        self.entry.bind("<KeyRelease>", self.update_pinyin)
+        self.entry.bind("<KeyRelease>", lambda event: (self.update_pinyin(event), self.parent.update_all_pinyin(event)))
 
         self.char_box = ColorBox(self, "字")
         self.initial_box = ColorBox(self, "声")
@@ -107,6 +109,8 @@ class IdiomSolverApp:
         
         self.guess_input = [] 
         self.candidates = []  
+        self.idioms = []
+        self.idiomdict = {}
         self.load_candidates()  
         
         self.create_widgets()
@@ -114,8 +118,9 @@ class IdiomSolverApp:
 
     def load_candidates(self):
         with open("data/processed_idioms.json", "r", encoding="utf-8") as f:
-            idioms = json.load(f)
-        self.candidates = [item["word"] for item in idioms]
+            self.idioms = json.load(f)
+        self.idiomdict = {item["word"] : [list(item["word"]), item["initials"], item["finals"], item["tones"]] for item in self.idioms}
+        self.candidates = [item["word"] for item in self.idioms]
 
     def create_widgets(self):
 
@@ -123,7 +128,7 @@ class IdiomSolverApp:
         self.entry_frame.pack(pady=20)
         self.cells = []
         for i in range(4):
-            cell = IdiomCell(self.entry_frame)
+            cell = IdiomCell(self.entry_frame, self)
             cell.grid(row=0, column=i, padx=5)
             self.cells.append(cell)
         
@@ -138,7 +143,34 @@ class IdiomSolverApp:
         self.candidate_label.pack()
         self.candidate_listbox = tk.Listbox(self.candidate_frame, width=30, height=10, font=("黑体", 12))
         self.candidate_listbox.pack()
+    def update_all_pinyin(self, event=None):
+        word = "".join([cell.entry.get().strip() for cell in self.cells])
         
+        if len(word) != 4 or not all('\u4e00' <= ch <= '\u9fff' for ch in word):
+            return
+
+        try:
+            item = next((item for item in self.idioms if item["word"] == word), None)
+            initials = item["initials"]
+            finals = item["finals"]
+            tones = item["tones"]
+
+            for i, cell in enumerate(self.cells):
+                ch = word[i]
+                ini = initials[i] or "-"
+                fin = finals[i] or "-"
+                tone_number = ''.join(filter(str.isdigit, tones[i])) or '0'
+
+                cell.char_box.set_text(ch)
+                cell.initial_box.set_text(ini)
+                cell.initial_box.config(font=(EnglishFont, 16))
+                cell.final_box.set_text(fin)
+                cell.final_box.config(font=(EnglishFont, 16))
+                cell.tone_box.set_text(tone_number)
+                cell.tone_box.config(font=(EnglishFont, 16))
+
+        except Exception as e:
+            print("拼音解析出错:", e)
     def on_submit(self):
         # 获取用户输入并更新候选词
         guess = "".join([cell.entry.get().strip() for cell in self.cells])
@@ -151,7 +183,7 @@ class IdiomSolverApp:
         if flag:
             if bool(re.fullmatch(r'^[\u4e00-\u9fff]{4}$', guess)):
                 feedback = self.get_user_feedback()  # 获取用户反馈
-                self.candidates = prune(guess, feedback, self.candidates)  
+                self.candidates = prune(guess, feedback, self.candidates, self.idiomdict)  
 
                 self.update_candidate_list()
             else:

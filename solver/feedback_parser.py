@@ -27,5 +27,5 @@ def compare(list1, list2):
 
     return result
 
-def get_feedback(answer, guess):
-    return [compare(x, y) for x, y in zip(extract_pinyin(answer), extract_pinyin(guess))]
+def get_feedback(answer, guess, idiomdict):
+    return [compare(x, y) for x, y in zip(idiomdict[answer], idiomdict[guess])]
