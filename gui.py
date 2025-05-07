@@ -1,4 +1,5 @@
 import json
+import re
 import tkinter as tk
 import tkinter.messagebox as messagebox
 import tkinter.font as tkFont
@@ -141,7 +142,7 @@ class IdiomSolverApp:
     def on_submit(self):
         # 获取用户输入并更新候选词
         guess = "".join([cell.entry.get().strip() for cell in self.cells])
-        if len(guess) == 4:
+        if bool(re.fullmatch(r'^[\u4e00-\u9fff]{4}$', guess)):
             feedback = self.get_user_feedback()  # 获取用户反馈
             self.candidates = prune(guess, feedback, self.candidates)  
 
