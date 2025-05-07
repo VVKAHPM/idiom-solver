@@ -142,13 +142,20 @@ class IdiomSolverApp:
     def on_submit(self):
         # 获取用户输入并更新候选词
         guess = "".join([cell.entry.get().strip() for cell in self.cells])
-        if bool(re.fullmatch(r'^[\u4e00-\u9fff]{4}$', guess)):
-            feedback = self.get_user_feedback()  # 获取用户反馈
-            self.candidates = prune(guess, feedback, self.candidates)  
+        flag = True
+        for cell in self.cells:
+            if len(cell.entry.get().strip()) != 1:
+                tk.messagebox.showerror("输入错误", "请在每个格内输入一个汉字！")
+                flag = False
+                break
+        if flag:
+            if bool(re.fullmatch(r'^[\u4e00-\u9fff]{4}$', guess)):
+                feedback = self.get_user_feedback()  # 获取用户反馈
+                self.candidates = prune(guess, feedback, self.candidates)  
 
-            self.update_candidate_list()
-        else:
-            tk.messagebox.showerror("输入错误", "请输入四个汉字！")
+                self.update_candidate_list()
+            else:
+                tk.messagebox.showerror("输入错误", "请输入四个汉字！")
         for cell in self.cells:
             cell.reset()
 
