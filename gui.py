@@ -128,6 +128,8 @@ class IdiomSolverApp:
         
         self.submit_button = tk.Button(self.master, text="提交", command=self.on_submit, font=("黑体", 14))
         self.submit_button.pack(pady=10)
+        reset_button = tk.Button(self.master, text="重新开始", command=self.reset, font=("黑体", 14))
+        reset_button.pack(pady=5)
 
         self.candidate_frame = tk.Frame(self.master)
         self.candidate_frame.pack(side="left", padx=20, pady=10)
@@ -164,3 +166,10 @@ class IdiomSolverApp:
         self.candidate_listbox.delete(0, tk.END)
         for cand in self.candidates[:10]:
             self.candidate_listbox.insert(tk.END, cand)
+    
+    def reset(self):
+        self.candidate_listbox.delete(0, tk.END)
+        self.load_candidates()
+        self.update_candidate_list()
+        for cell in self.cells:
+            cell.reset()
