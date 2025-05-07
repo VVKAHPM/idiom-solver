@@ -5,11 +5,13 @@ import tkinter.font as tkFont
 from pypinyin import pinyin, Style
 from solver.filter import prune
 
+ChineseFont = "楷体"
+EnglishFont = "'Times New Roman'"
 
 class ColorBox(tk.Label):
 
     def __init__(self, master, text, **kwargs):
-        super().__init__(master, text=text, width=6, height=3, font=("黑体", 16), relief="raised", **kwargs)
+        super().__init__(master, text=text, width=6, height=3, font=(ChineseFont, 16), relief="raised", **kwargs)
         self.state = 2
         self.text = text
         self.bind("<Button-1>", self.toggle_color)
@@ -38,7 +40,7 @@ class IdiomCell(tk.Frame):
     def __init__(self, master):
         super().__init__(master, bd=1, relief="solid", padx=5, pady=5)
         
-        self.entry = tk.Entry(self, width=3, font=("'黑体'", 36), justify="center")
+        self.entry = tk.Entry(self, width=3, font=(ChineseFont, 36), justify="center")
         self.entry.grid(row=0, column=0, columnspan=4, padx=8, pady=8, ipadx=8, ipady=15)
         self.entry.bind("<KeyRelease>", self.update_pinyin)
 
@@ -63,11 +65,11 @@ class IdiomCell(tk.Frame):
 
                 self.char_box.set_text(word)
                 self.initial_box.set_text(initial or "-")
-                self.initial_box.config(font=("'Times New Roman'", 16))
+                self.initial_box.config(font=(EnglishFont, 16))
                 self.final_box.set_text(final or "-")
-                self.final_box.config(font=("'Times New Roman'", 16))
+                self.final_box.config(font=(EnglishFont, 16))
                 self.tone_box.set_text(tone_number)
-                self.tone_box.config(font=("'Times New Roman'", 16))
+                self.tone_box.config(font=(EnglishFont, 16))
 
             except Exception as e:
                 print("拼音解析出错:", e)
@@ -76,25 +78,25 @@ class IdiomCell(tk.Frame):
             self.initial_box.set_text("声")
             self.final_box.set_text("韵")
             self.tone_box.set_text("调")
-            self.char_box.config(font=("黑体", 16))
-            self.initial_box.config(font=("黑体", 16))
-            self.final_box.config(font=("黑体", 16))
-            self.tone_box.config(font=("黑体", 16))
+            self.char_box.config(font=(ChineseFont, 16))
+            self.initial_box.config(font=(ChineseFont, 16))
+            self.final_box.config(font=(ChineseFont, 16))
+            self.tone_box.config(font=(ChineseFont, 16))
     def reset(self):
         self.entry.delete(0, tk.END)
-        self.char_box.config(text="字", font=("黑体", 16))
+        self.char_box.config(text="字", font=(ChineseFont, 16))
         self.char_box.state = 2
         self.char_box.update_color()
 
-        self.initial_box.config(text="声", font=("黑体", 16))
+        self.initial_box.config(text="声", font=(ChineseFont, 16))
         self.initial_box.state = 2
         self.initial_box.update_color()
 
-        self.final_box.config(text="韵", font=("黑体", 16))
+        self.final_box.config(text="韵", font=(ChineseFont, 16))
         self.final_box.state = 2
         self.final_box.update_color()
 
-        self.tone_box.config(text="调", font=("黑体", 16))
+        self.tone_box.config(text="调", font=(ChineseFont, 16))
         self.tone_box.state = 2
         self.tone_box.update_color()
 
