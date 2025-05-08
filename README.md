@@ -38,3 +38,12 @@ python main.py
 2. 程序会自动显示拼音、声调
 3. 根据 Handle 的反馈规则点击对应部分设置颜色
 4. 点击“提交”，左侧会更新推荐猜测和当前可能的候选成语
+
+## 数据来源
+
+- data/idiom.json 来源于[chinese-xinhua](https://github.com/pwxcoo/chinese-xinhua)
+- data/idiom.txt 及 data/polypolyphones.json 来源于[handle](https://github.com/antfu/handle)
+
+## 灵感来源
+
+本项目的设计灵感来自 3Blue1Brown 的视频：[用信息论解 Wordle 谜题](https://www.bilibili.com/video/BV1zZ4y1k7Jw)。该视频深入浅出地讲解了如何通过信息熵最大化策略优化猜词过程，对本项目的策略实现与交互设计均提供了重要启发。
