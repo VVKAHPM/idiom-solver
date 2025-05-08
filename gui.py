@@ -1,10 +1,12 @@
 import json
 import re
+import random
 import tkinter as tk
 import tkinter.messagebox as messagebox
 import tkinter.font as tkFont
 from pypinyin import pinyin, Style
 from solver.filter import prune
+from solver.entropy import rank_by_entropy
 
 ChineseFont = "楷体"
 EnglishFont = "'Times New Roman'"
@@ -110,17 +112,19 @@ class IdiomSolverApp:
         self.guess_input = [] 
         self.candidates = []  
         self.idioms = []
+        self.guesslist = []
         self.idiomdict = {}
         self.load_candidates()  
         
         self.create_widgets()
-        self.update_candidate_list()
+        self.update_candidate_list(True)
 
     def load_candidates(self):
         with open("data/processed_idioms.json", "r", encoding="utf-8") as f:
             self.idioms = json.load(f)
         self.idiomdict = {item["word"] : [list(item["word"]), item["initials"], item["finals"], item["tones"]] for item in self.idioms}
         self.candidates = [item["word"] for item in self.idioms]
+        self.guesslist = [item["word"] for item in self.idioms]
 
     def create_widgets(self):
 
@@ -139,8 +143,12 @@ class IdiomSolverApp:
 
         self.candidate_frame = tk.Frame(self.master)
         self.candidate_frame.pack(side="left", padx=20, pady=10)
-        self.candidate_label = tk.Label(self.candidate_frame, text="候选词列表", font=("黑体", 14))
-        self.candidate_label.pack()
+        self.candidate_label2 = tk.Label(self.candidate_frame, text="推荐猜测", font=("黑体", 14))
+        self.candidate_label2.pack()
+        self.candidate_recommendbox = tk.Listbox(self.candidate_frame, width=30, height=10, font=("黑体", 12))
+        self.candidate_recommendbox.pack()
+        self.candidate_label1 = tk.Label(self.candidate_frame, text="候选词列表", font=("黑体", 14))
+        self.candidate_label1.pack()
         self.candidate_listbox = tk.Listbox(self.candidate_frame, width=30, height=10, font=("黑体", 12))
         self.candidate_listbox.pack()
     def update_all_pinyin(self, event=None):
@@ -202,14 +210,20 @@ class IdiomSolverApp:
         print(feedback)
         return feedback
 
-    def update_candidate_list(self):
+    def update_candidate_list(self, initialflag=False):
         self.candidate_listbox.delete(0, tk.END)
-        for cand in self.candidates[:10]:
+        self.candidate_recommendbox.delete(0, tk.END)
+        top5 = rank_by_entropy(self.guesslist, self.candidates, 5, self.idiomdict, initialflag)
+        for cand in top5:
+            self.candidate_recommendbox.insert(tk.END, f"{cand[0]} {cand[1]:.2f}bit")
+        randomcandidates = self.candidates.copy()
+        random.shuffle(randomcandidates)
+        for cand in randomcandidates[:10]:
             self.candidate_listbox.insert(tk.END, cand)
     
     def reset(self):
         self.candidate_listbox.delete(0, tk.END)
         self.load_candidates()
-        self.update_candidate_list()
+        self.update_candidate_list(True)
         for cell in self.cells:
             cell.reset()
