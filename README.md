@@ -41,8 +41,8 @@ python main.py
 
 ## 数据来源
 
-- data/idiom.json 来源于[chinese-xinhua](https://github.com/pwxcoo/chinese-xinhua)
-- data/idiom.txt 及 data/polypolyphones.json 来源于[handle](https://github.com/antfu/handle)
+- data/idiom.json 来源于 [chinese-xinhua](https://github.com/pwxcoo/chinese-xinhua)
+- data/idiom.txt 及 data/polypolyphones.json 来源于 [handle](https://github.com/antfu/handle)
 
 ## 灵感来源
 
